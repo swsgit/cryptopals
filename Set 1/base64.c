@@ -71,7 +71,7 @@ char *base64_encode(const char *src, size_t len, size_t *dst_len) {
   }
 
   *dst_len = 4 * (len / 3) + padding;
-  char *dst = malloc(*dst_len * sizeof(char) + padding + 1);
+  char *dst = malloc(*dst_len * sizeof(char) + 1);
   for (i = 0, j = 0; i < *dst_len && j < len; i += 4, j += 3) {
     dst[i] = b64_table[a[j] >> 2];
     dst[i + 1] = b64_table[((a[j] & 0x03) << 4) | (a[j + 1] >> 4)];
