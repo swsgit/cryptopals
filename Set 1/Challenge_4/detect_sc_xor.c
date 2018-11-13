@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-const unsigned char keymap[] =
+static const unsigned char keymap[] =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz .?!';:,";
 
 char *single_xor(const unsigned char *str, unsigned char key, size_t len);
@@ -49,6 +49,7 @@ int main(void) {
     free(str);
     line_number++;
   }
+  fclose(fp);
 
   return 0;
 }

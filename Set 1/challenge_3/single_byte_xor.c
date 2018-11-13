@@ -3,10 +3,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-const unsigned char hex_str[] =
+static const unsigned char hex_str[] =
     "1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736";
 
-const unsigned char keymap[] =
+static const unsigned char keymap[] =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz .?!';:,";
 
 char *single_xor(const unsigned char *str, unsigned char key, size_t len);

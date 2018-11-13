@@ -57,12 +57,30 @@ enc[i+3] = |01|101110
            |00|101110 = b64_table[46] = u
 */
 
+static const unsigned char pr2six[256] = {
+    /* ASCII table */
+    64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
+    64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
+    64, 64, 64, 64, 64, 62, 64, 64, 64, 63, 52, 53, 54, 55, 56, 57, 58, 59, 60,
+    61, 64, 64, 64, 64, 64, 64, 64, 0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10,
+    11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 64, 64, 64, 64,
+    64, 64, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42,
+    43, 44, 45, 46, 47, 48, 49, 50, 51, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
+    64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
+    64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
+    64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
+    64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
+    64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
+    64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
+    64, 64, 64, 64, 64, 64, 64, 64, 64};
+
 static const unsigned char b64_table[65] =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
 char *base64_encode(const char *src, size_t len, size_t *dst_len) {
   size_t i, j, rem, padding;
-  const char *a = src;
+  register const char *a = src;
+  register char *dst;
   rem = len % 3;
   if (rem != 0) {
     padding = 4;
@@ -71,7 +89,7 @@ char *base64_encode(const char *src, size_t len, size_t *dst_len) {
   }
 
   *dst_len = 4 * (len / 3) + padding;
-  char *dst = malloc(*dst_len * sizeof(char) + 1);
+  dst = malloc(*dst_len * sizeof(char) + 1);
   for (i = 0, j = 0; i < *dst_len && j < len; i += 4, j += 3) {
     dst[i] = b64_table[a[j] >> 2];
     dst[i + 1] = b64_table[((a[j] & 0x03) << 4) | (a[j + 1] >> 4)];
@@ -85,6 +103,36 @@ char *base64_encode(const char *src, size_t len, size_t *dst_len) {
     dst[*dst_len - 1] = '=';
   }
 
+  dst[*dst_len] = '\0';
+
+  return dst;
+}
+
+char *base64_decode(const char *src, size_t len, size_t *dst_len) {
+  size_t i, j, padding;
+  register char *dst;
+  register const char *a = src;
+
+  if (src[len - 2] == '=' && src[len - 1] == '=') {
+    padding = 2;
+  } else if (src[len - 1] == '=') {
+    padding = 1;
+  } else {
+    padding = 0;
+  }
+  *dst_len = ((len / 4) * 3) - padding;
+  dst = malloc(*dst_len * sizeof(*dst));
+
+  for (i = 0, j = 0; i < *dst_len && j < len; i += 3, j += 4) {
+    dst[i] = pr2six[(size_t)a[j]] << 2 | pr2six[(size_t)a[j + 1]] >> 4;
+    dst[i + 1] = pr2six[(size_t)a[j + 1]] << 4 | pr2six[(size_t)a[j + 2]] >> 2;
+    dst[i + 2] = pr2six[(size_t)a[j + 2]] << 6 | pr2six[(size_t)a[j + 3]];
+  }
+  if (padding == 1) {
+    dst[i + 1] = pr2six[(size_t)a[j + 1]] << 4 | pr2six[(size_t)a[j + 2]] >> 2;
+  } else if (padding == 2) {
+    dst[i + 2] = pr2six[(size_t)a[j + 2]] << 6 | pr2six[(size_t)a[j + 3]];
+  }
   dst[*dst_len] = '\0';
 
   return dst;
