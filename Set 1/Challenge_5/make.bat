@@ -1,0 +1,1 @@
+clang rk_xor.c -O2 -Wall -Werror -Wextra -o rk_xor.exe
