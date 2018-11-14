@@ -1,0 +1,1 @@
+clang break_rk_xor.c ../base64.c -I.. -O2 -Wall -Werror -Wextra -o brkx.exe
